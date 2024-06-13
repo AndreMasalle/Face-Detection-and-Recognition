@@ -2,7 +2,6 @@ package org.d3if3155.studentattandance.screen
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -24,16 +23,19 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import org.d3if3155.studentattandance.R
+import org.d3if3155.studentattandance.navigations.Screen
 import org.d3if3155.studentattandance.ui.theme.StudentAttandanceTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(navController: NavHostController) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -58,7 +60,20 @@ fun MainScreen() {
             )
         }
     ) {padding ->
-        ScreenContent(Modifier.padding(padding))
+        ScreenContent(Modifier.padding(padding), navController)
+    }
+}
+
+@Composable
+fun ScreenContent(modifier: Modifier, navController: NavHostController) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 84.dp),
+    ) {
+        item{
+            AcademicYear()
+            MataKuliah(navController)
+        }
     }
 }
 
@@ -88,7 +103,7 @@ fun AcademicYear() {
 }
 
 @Composable
-fun MataKuliah(  ) {
+fun MataKuliah( navController: NavHostController ) {
 
     Card(
         modifier = Modifier
@@ -109,13 +124,13 @@ fun MataKuliah(  ) {
                 modifier = Modifier.padding(16.dp) // Weight to take up space
             )
             IconButton(
-                onClick = {  },
+                onClick = { navController.navigate(Screen.Presence.route) },
                 modifier = Modifier.padding(start = 8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Filled.ArrowForward,
                     contentDescription = "Trailing Icon",
-                    tint =  Color.Blue
+                    tint =  MaterialTheme.colorScheme.inverseSurface
                 )
             }
         }
@@ -138,9 +153,9 @@ fun MataKuliah(  ) {
                 modifier = Modifier.padding(start = 8.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Filled.ArrowForward,
+                    painter = painterResource(id = R.drawable.baseline_lock_24),
                     contentDescription = "Trailing Icon",
-                    tint =  Color.Blue
+                    tint =  MaterialTheme.colorScheme.inverseSurface
                 )
             }
         }
@@ -163,9 +178,9 @@ fun MataKuliah(  ) {
                 modifier = Modifier.padding(start = 8.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Filled.ArrowForward,
+                    painter = painterResource(id = R.drawable.baseline_lock_24),
                     contentDescription = "Trailing Icon",
-                    tint =  Color.Blue
+                    tint =  MaterialTheme.colorScheme.inverseSurface
                 )
             }
         }
@@ -178,25 +193,14 @@ fun MataKuliah(  ) {
 }
 
 
-@Composable
-fun ScreenContent(modifier: Modifier) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 84.dp),
-    ) {
-        item{
-            AcademicYear()
-            MataKuliah()
-        }
-    }
-}
+
 
 
 @Preview(showBackground = true)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun MainPreview() {
     StudentAttandanceTheme {
-        MainScreen()
+        MainScreen(rememberNavController())
     }
 }
