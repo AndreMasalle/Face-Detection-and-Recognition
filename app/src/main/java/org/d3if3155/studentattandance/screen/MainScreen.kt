@@ -2,6 +2,7 @@ package org.d3if3155.studentattandance.screen
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -23,19 +24,16 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import org.d3if3155.studentattandance.R
-import org.d3if3155.studentattandance.navigations.Screen
 import org.d3if3155.studentattandance.ui.theme.StudentAttandanceTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(navController: NavHostController) {
+fun MainScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -60,20 +58,7 @@ fun MainScreen(navController: NavHostController) {
             )
         }
     ) {padding ->
-        ScreenContent(Modifier.padding(padding), navController)
-    }
-}
-
-@Composable
-fun ScreenContent(modifier: Modifier, navController: NavHostController) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 84.dp),
-    ) {
-        item{
-            AcademicYear()
-            MataKuliah(navController)
-        }
+        ScreenContent(Modifier.padding(padding))
     }
 }
 
@@ -103,7 +88,7 @@ fun AcademicYear() {
 }
 
 @Composable
-fun MataKuliah( navController: NavHostController ) {
+fun MataKuliah(  ) {
 
     Card(
         modifier = Modifier
@@ -124,13 +109,13 @@ fun MataKuliah( navController: NavHostController ) {
                 modifier = Modifier.padding(16.dp) // Weight to take up space
             )
             IconButton(
-                onClick = { navController.navigate(Screen.Presence.route) },
+                onClick = {  },
                 modifier = Modifier.padding(start = 8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Filled.ArrowForward,
                     contentDescription = "Trailing Icon",
-                    tint =  MaterialTheme.colorScheme.inverseSurface
+                    tint =  Color.Blue
                 )
             }
         }
@@ -153,9 +138,9 @@ fun MataKuliah( navController: NavHostController ) {
                 modifier = Modifier.padding(start = 8.dp)
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.baseline_lock_24),
+                    imageVector = Icons.Filled.ArrowForward,
                     contentDescription = "Trailing Icon",
-                    tint =  MaterialTheme.colorScheme.inverseSurface
+                    tint =  Color.Blue
                 )
             }
         }
@@ -178,9 +163,9 @@ fun MataKuliah( navController: NavHostController ) {
                 modifier = Modifier.padding(start = 8.dp)
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.baseline_lock_24),
+                    imageVector = Icons.Filled.ArrowForward,
                     contentDescription = "Trailing Icon",
-                    tint =  MaterialTheme.colorScheme.inverseSurface
+                    tint =  Color.Blue
                 )
             }
         }
@@ -193,14 +178,25 @@ fun MataKuliah( navController: NavHostController ) {
 }
 
 
-
+@Composable
+fun ScreenContent(modifier: Modifier) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 84.dp),
+    ) {
+        item{
+            AcademicYear()
+            MataKuliah()
+        }
+    }
+}
 
 
 @Preview(showBackground = true)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
-fun MainPreview() {
+fun GreetingPreview() {
     StudentAttandanceTheme {
-        MainScreen(rememberNavController())
+        MainScreen()
     }
 }
