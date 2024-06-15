@@ -67,6 +67,21 @@ class PresenceViewModel : ViewModel() {
         }
     }
 
+    fun deletingData(userId: String,id: Long){
+        viewModelScope.launch(Dispatchers.IO){
+            try {
+                val result = ModuleApi.service.deleteHewan(userId = userId,id = id.toString())
+                if (result.status == "success")
+                    retrieveData(userId = userId)
+                else
+                    throw Exception(result.message)
+            }catch (e: Exception){
+                Log.d("MainViewModel", "Failure: ${e.message}")
+                errorMessage.value = "Error: ${e.message}"
+            }
+        }
+    }
+
 
     private fun Bitmap.toMultipartBody(): MultipartBody.Part{
         val stream = ByteArrayOutputStream()

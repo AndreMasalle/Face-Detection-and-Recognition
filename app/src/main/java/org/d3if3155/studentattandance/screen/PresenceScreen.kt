@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -187,7 +188,7 @@ fun PresenceContent(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(data){
-                ListGambar(datanya = it)
+                ListGambar(userId,datanya = it, viewModel)
             }
         }
     }
@@ -243,7 +244,10 @@ fun PersenKehadiran() {
 }
 
 @Composable
-fun ListGambar(datanya: Datanya) {
+fun ListGambar(userId: String,datanya: Datanya, viewModel: PresenceViewModel) {
+    var onShowDeleting by remember {
+        mutableStateOf(false)
+    }
 
     Box(
         modifier = Modifier
@@ -284,6 +288,23 @@ fun ListGambar(datanya: Datanya) {
         ) {
             Text(text = datanya.nama, fontWeight = FontWeight.Bold, color = Color.White)
             Text(text = datanya.namaLatin, fontWeight = FontWeight.Bold, color = Color.White)
+        }
+        if (datanya.mine == 1){
+            IconButton(onClick = {
+                onShowDeleting = true
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(id = R.string.hapus),
+                    tint = Color.White
+                )
+            }
+        }
+        if (onShowDeleting){
+            hapusDialog(onDismissRequest = { onShowDeleting = false }, onConfirmation = {
+                onShowDeleting = false
+                viewModel.deletingData(userId, id = datanya.id)
+            }, id = datanya.id, datanya = datanya)
         }
     }
 

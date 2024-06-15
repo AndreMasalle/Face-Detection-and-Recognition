@@ -11,4 +11,5 @@
     <string name="keterangan">Keterangan</string>
     <string name="pertemuan">Pertemuan</string>
     <string name="tambah">Tambah</string>
+    <string name="hapus">Hapus</string>
 </resources>
