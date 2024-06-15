@@ -1,10 +1,13 @@
 package org.d3if3155.studentattandance.screen
 
+//import kotlinx.coroutines.flow.internal.NoOpContinuation.context
 import android.content.Context
 import android.content.res.Configuration
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -23,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +47,7 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.ClearCredentialException
 import androidx.credentials.exceptions.GetCredentialException
-import androidx.datastore.dataStore
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -55,8 +60,11 @@ import org.d3if3155.studentattandance.BuildConfig
 import org.d3if3155.studentattandance.R
 import org.d3if3155.studentattandance.model.User
 import org.d3if3155.studentattandance.navigations.Screen
+import org.d3if3155.studentattandance.network.ApiStatus
 import org.d3if3155.studentattandance.network.UserDataStore
 import org.d3if3155.studentattandance.ui.theme.StudentAttandanceTheme
+
+//import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,7 +93,6 @@ fun MainScreen(navController: NavHostController) {
                             CoroutineScope(Dispatchers.IO).launch { signIn(context = context, dataStore) }
                         }
                         else{
-//                            Log.d("SIGN-IN", "User: $user")
                             showDialog = true
                         }
                     }) {
@@ -99,7 +106,7 @@ fun MainScreen(navController: NavHostController) {
             )
         }
     ) {padding ->
-        ScreenContent(Modifier.padding(padding), navController)
+        ScreenContent(user.name,Modifier.padding(padding),user.email, navController)
 
         if (showDialog) {
             ProfilDialog(
@@ -109,24 +116,65 @@ fun MainScreen(navController: NavHostController) {
                 showDialog = false
             }
         }
+
+
     }
 }
 
 @Composable
-fun ScreenContent(modifier: Modifier, navController: NavHostController) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 84.dp),
-    ) {
-        item{
-            AcademicYear()
-            MataKuliah(navController)
+fun ScreenContent(userName: String,modifier: Modifier, userId:String,navController: NavHostController) {
+
+    val viewModel: PresenceViewModel = viewModel()
+    val status by viewModel.status.collectAsState()
+
+    LaunchedEffect(userId){
+        viewModel.retrieveData(userId)
+    }
+    when(status){
+        ApiStatus.LOADING ->{
+//            Box(
+//                modifier = Modifier.fillMaxSize(),
+//                contentAlignment = Alignment.Center
+//            ) {
+//                CircularProgressIndicator()
+//            }
+            Text(text = "Loading")
         }
+
+        ApiStatus.SUCCESS ->{
+            LazyColumn(
+                modifier = modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 84.dp),
+            ) {
+                item{
+                    Identity(userName)
+                    MataKuliah(navController, userName)
+                }
+            }
+        }
+
+        ApiStatus.FAILED ->{
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = stringResource(R.string.error))
+                Button(
+                    onClick = { viewModel.retrieveData(userId)},
+                    modifier = Modifier.padding(top = 16.dp),
+                    contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
+                ) {
+                    Text(text = stringResource(id = R.string.try_again))
+                }
+            }
+        }
+
     }
 }
 
 @Composable
-fun AcademicYear() {
+fun Identity(userName: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -141,17 +189,25 @@ fun AcademicYear() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Tahun akademik: Genap 2024",
+                text = "Name:",
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(16.dp) // Weight to take up space
+                modifier = Modifier.padding(16.dp)
+            )
+            Text(
+                text = userName,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(16.dp)
             )
         }
     }
-
 }
 
+
+
 @Composable
-fun MataKuliah( navController: NavHostController ) {
+fun MataKuliah( navController: NavHostController, userName: String ) {
+
+    val context = LocalContext.current
 
     Card(
         modifier = Modifier
@@ -169,10 +225,17 @@ fun MataKuliah( navController: NavHostController ) {
             Text(
                 text = "Mobile Programming",
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(16.dp) // Weight to take up space
+                modifier = Modifier.padding(16.dp)
             )
             IconButton(
-                onClick = { navController.navigate(Screen.Presence.route) },
+                onClick = {
+                    if (userName.isEmpty()){
+                        Toast.makeText(
+                            context, "Please Login to proceed", Toast.LENGTH_SHORT).show()
+                    }else{
+                        navController.navigate(Screen.Presence.route)
+                    }
+                          },
                 modifier = Modifier.padding(start = 8.dp)
             ) {
                 Icon(
@@ -194,7 +257,7 @@ fun MataKuliah( navController: NavHostController ) {
             Text(
                 text = "Game Development",
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(16.dp) // Weight to take up space
+                modifier = Modifier.padding(16.dp)
             )
             IconButton(
                 onClick = {  },
